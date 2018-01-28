@@ -32,7 +32,8 @@ class Cat {
       location: this.location,
       rating: this.rating || 0,
       photo: this.photo,
-      timestamp: this.timestamp
+      timestamp: this.timestamp,
+      submited_by: this.submited_by
     }).then(() => {
       this.id = catRef.id;
       return this;

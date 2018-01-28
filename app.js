@@ -19,8 +19,9 @@ app.get('/', (req, res) => res.send('Hello World!'))
 */
 app.post('/submitCat', (req, res) => {
   var cat = req.body;
-  cat.timestamp = (new Date()).toString();
+  cat.timestamp = Date.now();
   var newCat = new Cat(cat);
+  newCat.timestamp_string = cat.timestamp.toString();
   newCat.save()
   .then(obj => {
       CatIMAP.add(obj);
