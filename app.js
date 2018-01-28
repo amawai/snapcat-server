@@ -1,5 +1,8 @@
 const express = require('express')
-const app = express();
+const app = express()
+const rootPath = require('app-root-dir').get();
+const CatVerification = require(rootPath + '/watson.js');
+let verifyCat = new CatVerification();
 const Cat = require('./models/Cat');
 const CatIMAP = require('./models/DataStore/CatIMAP.js').instance();
 const firebase = require('./firebase.js');
@@ -111,6 +114,7 @@ app.post('/nextCat', (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 app.get('/test', (req, res) => {
     var watson = require('watson-developer-cloud');
     var fs = require('fs');
@@ -140,5 +144,12 @@ app.get('/test', (req, res) => {
     });
         res.send('bye world');
 });
+=======
+ 
+app.get('/cat', (req, res) => {
+  verifyCat.verifyIfCat('./cat.jpg');
+  res.send('ok!');
+})
+>>>>>>> b9e3f7ab7eac7f788f610569387ab8be4d0084ab
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'));
