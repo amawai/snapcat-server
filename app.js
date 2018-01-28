@@ -2,6 +2,9 @@ const express = require('express')
 const app = express();
 const Cat = require('./models/Cat');
 const CatIMAP = require('./models/DataStore/CatIMAP.js').instance();
+const firebase = require('./firebase.js');
+const _ = require('underscore');
+const latToMilesMultiplier = 69;
 var bodyParser = require('body-parser');
 
 app.use(bodyParser.json()); // for parsing application/json
@@ -37,7 +40,76 @@ app.post('/upvoteCat', (req, res) => {
     .then(() => res.send('OK'))
     .catch(() => res.error('Not found cat'));
   })
-})
+});
+
+app.post('/createCatQueue', (req, res) => {
+  var monthAgo = new Date();
+  monthAgo.setMonth(monthAgo.getMonth()-1); //Get only from past month
+  var lastUpdate = monthAgo.valueOf();
+  //Bound the location
+  var limitLatN = req.body.location.latitude + 10/latToMilesMultiplier;
+  var limitLatS = req.body.location.latitude - 10/latToMilesMultiplier;
+  var limitLonE = req.body.location.longitude + 10/latToMilesMultiplier;
+  var limitLonW = req.body.location.longitude - 10/latToMilesMultiplier;
+  firebase.collection('queues').doc(req.body.id).get()
+  .then(result => {
+    if(result.data().timestamp) {
+      lastUpdate = result.data().timestamp.valueOf();
+    }
+  })
+  .then(() => {
+    firebase.collection('cats')
+    .orderBy('timestamp', 'desc')
+    .where('timestamp', '>', lastUpdate)
+    .get()
+    .then(result => result.docs)
+    .then(docs => docs.filter(doc => {
+      location = doc.data().location;
+      return location.latitude > limitLatS &&
+        location.latitude < limitLatN &&
+        location.longitude > limitLonW &&
+        location.longitude < limitLonE
+    }))
+    .then(filtered => {
+      var catIds = []
+      filtered.forEach(doc =>  {
+        catIds.push(doc.id);
+      });
+      console.log(catIds);
+      firebase.collection('queues').doc(req.body.id).set({
+        queue: catIds,
+        timestamp: lastUpdate
+      })
+      .then(() => res.send('OK'));
+    });
+  });
+});
+
+app.post('/nextCat', (req, res) => {
+  firebase.collection('queues').doc(req.body.id).get()
+  .then(doc => {
+    //Fetch the queue
+    var queue = doc.data().queue;
+    if(queue.length === 0) {
+      res.send('No more cats');
+    }
+    catId = queue.pop();
+    console.log(catId);
+    CatIMAP.get(catId).then(
+      cat => {
+        var newQueueTimestamp = cat.timestamp;
+        firebase.collection('queues').doc(req.body.id).set({
+          queue: queue,
+          timestamp: newQueueTimestamp
+        })
+        .then(res.json({
+          id: catId,
+          photo: cat.photo,
+          rating: cat.rating
+        }));
+      });
+  });
+});
 
 app.get('/test', (req, res) => {
     var watson = require('watson-developer-cloud');
@@ -67,6 +139,6 @@ app.get('/test', (req, res) => {
         // console.log(response.images.classfiers[0].classes)
     });
         res.send('bye world');
-})
+});
 
-app.listen(3000, () => console.log('Example app listening on port 3000!'))
+app.listen(3000, () => console.log('Example app listening on port 3000!'));
