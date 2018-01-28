@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@firebase/firestore": "^0.3.1",
+    "app-root-dir": "^1.0.2",
     "express": "^4.16.2",
     "firebase": "^4.9.0",
     "firebase-admin": "^5.8.1",
