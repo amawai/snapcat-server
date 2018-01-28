@@ -8,6 +8,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "app-root-dir": "^1.0.2",
     "express": "^4.16.2",
     "watson-developer-cloud": "^3.0.5"
   },
