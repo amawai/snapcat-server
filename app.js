@@ -114,7 +114,6 @@ app.post('/nextCat', (req, res) => {
   });
 });
 
-<<<<<<< HEAD
 app.get('/test', (req, res) => {
     var watson = require('watson-developer-cloud');
     var fs = require('fs');
@@ -144,12 +143,10 @@ app.get('/test', (req, res) => {
     });
         res.send('bye world');
 });
-=======
- 
+
 app.get('/cat', (req, res) => {
   verifyCat.verifyIfCat('./cat.jpg');
   res.send('ok!');
 })
->>>>>>> b9e3f7ab7eac7f788f610569387ab8be4d0084ab
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'));
